@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>养鸡场测试台 (人性化布局版)</title>
+    <style>
+        /* 全局重置 */
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f4f6f8;
+            height: 100vh;
+            display: flex; /* 左右布局核心 */
+            overflow: hidden; /* 防止整个页面双重滚动 */
+        }
+
+        /* === 左侧：滚动操作区 === */
+        .left-panel {
+            flex: 1; /* 占据剩余空间 */
+            padding: 20px;
+            overflow-y: auto; /* 内容多了可以滚动 */
+            height: 100%;
+        }
+
+        /* === 右侧：固定日志区 === */
+        .right-panel {
+            width: 400px; /* 固定宽度 */
+            background: #2b2b2b;
+            color: #ccc;
+            display: flex;
+            flex-direction: column;
+            border-left: 5px solid #007bff;
+        }
+
+        /* 日志头部 */
+        .log-header {
+            padding: 10px;
+            background: #1e1e1e;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .log-title { font-weight: bold; color: #fff; }
+        .clear-btn {
+            font-size: 12px; padding: 4px 8px; background: #555; border: none;
+            color: white; cursor: pointer; border-radius: 3px;
+        }
+        .clear-btn:hover { background: #777; }
+
+        /* 日志内容滚动区 */
+        #console-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+        }
+
+        /* === 具体的卡片样式 === */
+        .box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            max-width: 800px; /* 限制最大宽度，防止太宽难看 */
+            margin-left: auto; margin-right: auto; /* 居中 */
+        }
+        .box h2 { margin-top: 0; font-size: 18px; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+
+        /* 表单样式 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* 自动多列 */
+            gap: 15px;
+        }
+        .form-item { display: flex; flex-direction: column; }
+        .form-item label { font-size: 12px; font-weight: bold; color: #666; margin-bottom: 5px; }
+        .form-item input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-item input:focus { border-color: #007bff; outline: none; }
+
+        /* 按钮组 */
+        .btn-row { margin-top: 20px; text-align: right; }
+        button {
+            padding: 10px 20px; border: none; border-radius: 4px;
+            background: #007bff; color: white; cursor: pointer; font-weight: 600;
+            transition: 0.2s;
+        }
+        button:hover { background: #0056b3; }
+        button.red { background: #dc3545; }
+        button.red:hover { background: #a71d2a; }
+        button.green { background: #28a745; }
+        button.green:hover { background: #218838; }
+
+        /* 日志颜色 */
+        .log-entry { margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .log-time { color: #888; margin-bottom: 4px; font-size: 11px; }
+        .c-req { color: #61afef; } /* 蓝色请求 */
+        .c-res { color: #98c379; } /* 绿色响应 */
+        .c-err { color: #e06c75; } /* 红色错误 */
+
+    </style>
+</head>
+<body>
+
+<div class="left-panel">
+    <h1 style="text-align:center; color:#444;">🐣 养鸡场管理系统 - 终极测试台</h1>
+
+    <div class="box">
+        <h2>👤 1. 添加用户 (User Register)</h2>
+        <div class="form-grid">
+            <div class="form-item"><label>昵称*</label><input type="text" id="add_u_nick" value="测试员01"></div>
+            <div class="form-item"><label>密码*</label><input type="text" id="add_u_pwd" value="123456"></div>
+            <div class="form-item"><label>性别</label><input type="text" id="add_u_sex" value="男"></div>
+            <div class="form-item"><label>年龄</label><input type="number" id="add_u_age" value="22"></div>
+            <div class="form-item"><label>头像URL</label><input type="text" id="add_u_img" value="a.jpg"></div>
+            <div class="form-item"><label>签名</label><input type="text" id="add_u_imp" value="测试专用"></div>
+            <div class="form-item"><label>爱好</label><input type="text" id="add_u_hobby" value="睡觉"></div>
+        </div>
+        <div class="btn-row">
+            <button onclick="doAddUser()">➕ 提交注册</button>
+        </div>
+    </div>
+
+    <div class="box">
+        <h2>✏️ 2. 修改用户 (User Update)</h2>
+        <div class="form-grid">
+            <div class="form-item"><label style="color:red">目标账号ID*</label><input type="number" id="upd_u_account" placeholder="必填"></div>
+            <div class="form-item"><label>新昵称</label><input type="text" id="upd_u_nick" placeholder="不改留空"></div>
+            <div class="form-item"><label>新密码</label><input type="text" id="upd_u_pwd"></div>
+            <div class="form-item"><label>新性别</label><input type="text" id="upd_u_sex"></div>
+            <div class="form-item"><label>新年龄</label><input type="number" id="upd_u_age"></div>
+            <div class="form-item"><label>新头像</label><input type="text" id="upd_u_img"></div>
+            <div class="form-item"><label>新签名</label><input type="text" id="upd_u_imp"></div>
+            <div class="form-item"><label>新爱好</label><input type="text" id="upd_u_hobby"></div>
+        </div>
+        <div class="btn-row">
+            <button class="green" onclick="doUpdateUser()">💾 提交修改</button>
+        </div>
+    </div>
+
+    <div class="box">
+        <h2>🔍 3. 用户查询与删除</h2>
+        <div class="form-grid">
+            <div class="form-item"><label>账号ID</label><input type="number" id="act_u_account" placeholder="输入账号"></div>
+        </div>
+        <div class="btn-row" style="gap:10px; display:flex; justify-content:flex-end;">
+            <button onclick="doGetUserAll()">查所有</button>
+            <button onclick="doGetUserOne()">查单个</button>
+            <button class="red" onclick="doDeleteUser()">🗑️ 删除</button>
+        </div>
+    </div>
+
+    <div class="box" style="border-top: 4px solid #ffc107;">
+        <h2>🐔 4. 添加鸡 (Chicken Add)</h2>
+        <div class="form-grid">
+            <div class="form-item"><label style="color:red">主人账号ID*</label><input type="number" id="add_c_master" placeholder="必填"></div>
+            <div class="form-item"><label>鸡昵称</label><input type="text" id="add_c_nick" value="小黄鸡"></div>
+            <div class="form-item"><label>品质</label><input type="text" id="add_c_per" value="SSR"></div>
+            <div class="form-item"><label>属性</label><input type="text" id="add_c_prop" value="战斗"></div>
+            <div class="form-item"><label>时长</label><input type="text" id="add_c_times" value="3年"></div>
+            <div class="form-item"><label>评分</label><input type="text" id="add_c_rating" value="S"></div>
+            <div class="form-item"><label>身高</label><input type="text" id="add_c_h" value="50"></div>
+            <div class="form-item"><label>体重</label><input type="text" id="add_c_w" value="5"></div>
+            <div class="form-item"><label>胸围</label><input type="text" id="add_c_b" value="20"></div>
+            <div class="form-item"><label>长度</label><input type="text" id="add_c_l" value="30"></div>
+        </div>
+        <div class="btn-row">
+            <button onclick="doAddCk()">➕ 添加鸡</button>
+        </div>
+    </div>
+
+    <div class="box" style="border-top: 4px solid #ffc107;">
+        <h2>🛠️ 5. 修改鸡 (Chicken Update)</h2>
+        <div class="form-grid">
+            <div class="form-item"><label style="color:red">主人账号ID*</label><input type="number" id="upd_c_master" placeholder="必填"></div>
+            <div class="form-item"><label>新昵称</label><input type="text" id="upd_c_nick" placeholder="不改留空"></div>
+            <div class="form-item"><label>新品质</label><input type="text" id="upd_c_per"></div>
+            <div class="form-item"><label>新属性</label><input type="text" id="upd_c_prop"></div>
+            <div class="form-item"><label>新时长</label><input type="text" id="upd_c_times"></div>
+            <div class="form-item"><label>新评分</label><input type="text" id="upd_c_rating"></div>
+            <div class="form-item"><label>新身高</label><input type="text" id="upd_c_h"></div>
+            <div class="form-item"><label>新体重</label><input type="text" id="upd_c_w"></div>
+            <div class="form-item"><label>新胸围</label><input type="text" id="upd_c_b"></div>
+            <div class="form-item"><label>新长度</label><input type="text" id="upd_c_l"></div>
+        </div>
+        <div class="btn-row">
+            <button class="green" onclick="doUpdateCk()">💾 提交修改</button>
+        </div>
+    </div>
+
+    <div class="box" style="border-top: 4px solid #ffc107;">
+        <h2>🍗 6. 鸡查询与删除</h2>
+        <div class="form-grid">
+            <div class="form-item"><label>主人账号ID</label><input type="number" id="act_c_master" placeholder="输入账号"></div>
+        </div>
+        <div class="btn-row" style="gap:10px; display:flex; justify-content:flex-end;">
+            <button onclick="doGetCkAll()">查所有</button>
+            <button onclick="doGetCkOne()">查单个</button>
+            <button class="red" onclick="doDeleteCk()">🗑️ 删除</button>
+        </div>
+    </div>
+
+    <br><br><br>
+</div>
+
+<div class="right-panel">
+    <div class="log-header">
+        <span class="log-title">📡 交互日志</span>
+        <button class="clear-btn" onclick="document.getElementById('console-box').innerHTML=''">清空日志</button>
+    </div>
+    <div id="console-box">
+        <div style="color:#666; text-align:center; margin-top:50px;">
+            🚀 等待操作...<br>请点击左侧按钮
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080";
+
+    // 打印日志
+    function log(title, data, type) {
+        const box = document.getElementById('console-box');
+
+        // 如果是第一条，清空默认提示
+        if(box.innerHTML.includes("等待操作")) box.innerHTML = "";
+
+        const time = new Date().toLocaleTimeString();
+        let content = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+
+        let colorClass = 'c-req';
+        if(type === 'success') colorClass = 'c-res';
+        if(type === 'error') colorClass = 'c-err';
+
+        const html = `
+            <div class="log-entry">
+                <div class="log-time">[${time}] ${title}</div>
+                <pre class="${colorClass}" style="white-space:pre-wrap; margin:0;">${content}</pre>
+            </div>
+        `;
+        box.insertAdjacentHTML('afterbegin', html); // 新日志插在最上面
+    }
+
+    // 通用请求
+    async function send(path, method, bodyData) {
+        const url = API_URL + path;
+        log(`📡 发送 ${method}`, url);
+
+        const options = {
+            method: method,
+            headers: { 'Content-Type': 'application/json' }
+        };
+
+        if (bodyData && method !== 'GET') {
+            const cleanData = {};
+            for (let key in bodyData) {
+                if (bodyData[key] !== null && bodyData[key] !== "") {
+                    cleanData[key] = bodyData[key];
+                }
+            }
+            options.body = JSON.stringify(cleanData);
+            log("📦 发送 Body", cleanData);
+        }
+
+        try {
+            const res = await fetch(url, options);
+            const json = await res.json();
+
+            if(json.code === 1 || json.code === 200) {
+                log("✅ 成功", json, 'success');
+            } else {
+                log("❌ 失败", json.msg || json, 'error');
+                // 只有失败时才弹窗提醒，成功就不弹了，看日志即可
+                alert("报错啦: " + (json.msg || "未知错误"));
+            }
+        } catch (err) {
+            log("⛔ 网络错误", err, 'error');
+            alert("请求发不出去，请检查后端是否启动！");
+        }
+    }
+
+    // ================= 功能函数 (逻辑不变) =================
+
+    function doAddUser() {
+        send('/user', 'POST', {
+            user_nick: val('add_u_nick'), user_pwd: val('add_u_pwd'), user_sex: val('add_u_sex'),
+            user_age: val('add_u_age'), user_img: val('add_u_img'), user_imp: val('add_u_imp'), user_hobby: val('add_u_hobby')
+        });
+    }
+
+    function doUpdateUser() {
+        const acc = val('upd_u_account');
+        if(!acc) return alert("没填账号！");
+        send('/user?account=' + acc, 'PUT', {
+            user_nick: val('upd_u_nick'), user_pwd: val('upd_u_pwd'), user_sex: val('upd_u_sex'),
+            user_age: val('upd_u_age'), user_img: val('upd_u_img'), user_imp: val('upd_u_imp'), user_hobby: val('upd_u_hobby')
+        });
+    }
+
+    function doGetUserAll() { send('/user', 'GET'); }
+    function doGetUserOne() {
+        const acc = val('act_u_account');
+        if(!acc) return alert("没填账号！");
+        send('/user/' + acc, 'GET');
+    }
+    function doDeleteUser() {
+        const acc = val('act_u_account');
+        if(!acc) return alert("没填账号！");
+        if(confirm("删人会连鸡一起删哦，确定？")) send('/user/' + acc, 'DELETE');
+    }
+
+    function doAddCk() {
+        const master = val('add_c_master');
+        if(!master) return alert("没填主人账号！");
+        send('/ck?account=' + master, 'POST', {
+            ck_nick: val('add_c_nick'), ck_per: val('add_c_per'), ck_property: val('add_c_prop'),
+            ck_times: val('add_c_times'), ck_rating: val('add_c_rating'), ck_data_height: val('add_c_h'),
+            ck_data_weight: val('add_c_w'), ck_data_breast: val('add_c_b'), ck_data_length: val('add_c_l')
+        });
+    }
+
+    function doUpdateCk() {
+        const master = val('upd_c_master');
+        if(!master) return alert("没填主人账号！");
+        send('/ck?account=' + master, 'PUT', {
+            ck_nick: val('upd_c_nick'), ck_per: val('upd_c_per'), ck_property: val('upd_c_prop'),
+            ck_times: val('upd_c_times'), ck_rating: val('upd_c_rating'), ck_data_height: val('upd_c_h'),
+            ck_data_weight: val('upd_c_w'), ck_data_breast: val('upd_c_b'), ck_data_length: val('upd_c_l')
+        });
+    }
+
+    function doGetCkAll() { send('/ck', 'GET'); }
+    function doGetCkOne() {
+        const master = val('act_c_master');
+        if(!master) return alert("没填主人账号！");
+        send('/ck/' + master, 'GET');
+    }
+    function doDeleteCk() {
+        const master = val('act_c_master');
+        if(!master) return alert("没填主人账号！");
+        if(confirm("确定杀鸡？")) send('/ck/' + master, 'DELETE');
+    }
+
+    // 简便获取 value 的小工具
+    function val(id) {
+        return document.getElementById(id).value;
+    }
+
+</script>
+</body>
+</html>
