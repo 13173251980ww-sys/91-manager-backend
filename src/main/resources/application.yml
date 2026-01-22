@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: Nine_One_System_V2
+  #数据库的连接配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/nine_one_system
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 114514
+
